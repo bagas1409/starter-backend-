@@ -1,37 +1,51 @@
-import express from 'express';
-import cors from 'cors';
-import helmet from 'helmet';
-import morgan from 'morgan';
-import { env, isProd } from './config/env.js';
-import routes from './routes/index.js';
-import { notFound } from './middlewares/notFound.js';
-import { errorHandler } from './middlewares/errorHandler.js';
-
+import express from "express";
+import cors from "cors";
+import helmet from "helmet";
+import morgan from "morgan";
+import meRoutes from "./routes/me.routes.js";
+import authRoutes from "./routes/auth.routes.js";
+import umkmRoutes from "./routes/umkm.routes.js";
+import adminRoutes from "./routes/admin.routes.js";
+import productRoutes from "./routes/product.routes.js";
+import publicRoutes from "./routes/public.routes.js";
+import cartRoutes from "./routes/cart.routes.js";
+import checkoutRoutes from "./routes/checkout.routes.js";
+import orderRoutes from "./routes/order.routes.js";
+import disputeRoutes from "./routes/dispute.routes.js";
+import paymentRoutes from "./routes/payment.routes.js";
+import midtransRoutes from "./routes/midtrans.routes.js";
+import uploadRoutes from "./routes/upload.routes.js";
 const app = express();
 
-// Security middlewares
 app.use(helmet());
-
-// CORS configuration
+// ⬇️ INI YANG DIUBAH
 app.use(
-    cors({
-        origin: env.CORS_ORIGIN === '*' ? true : env.CORS_ORIGIN,
-        credentials: true,
-    })
+  cors({
+    origin: "*",
+  })
 );
+app.use(morgan("dev"));
+app.use(express.json());
 
-// Logging
-app.use(morgan(isProd ? 'combined' : 'dev'));
+// routes
+app.use("/auth", authRoutes);
+app.use("/me", meRoutes);
+app.use("/umkm", umkmRoutes);
+app.use("/admin", adminRoutes);
+app.use("/public", publicRoutes);
+app.use("/products", productRoutes);
 
-// Body parsing
-app.use(express.json({ limit: '2mb' }));
-app.use(express.urlencoded({ extended: true }));
+app.use("/cart", cartRoutes);
+app.use("/checkout", checkoutRoutes);
+app.use("/orders", orderRoutes);
+app.use("/disputes", disputeRoutes);
+app.use("/payments", paymentRoutes);
+app.use("/midtrans", midtransRoutes);
+app.use("/upload", uploadRoutes);
 
-// Routes
-app.use('/api', routes);
-
-// Error handling
-app.use(notFound);
-app.use(errorHandler);
+// 404 handler
+app.use((req, res) => {
+  res.status(404).json({ message: "Route not found" });
+});
 
 export default app;
